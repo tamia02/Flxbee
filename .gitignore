@@ -1,0 +1,12 @@
+.wwebjs_auth/
+node_modules/
+videos/
+sites/
+__pycache__/
+*.log
+temp_logs.txt
+server_error.log
+outreach_queue.json
+leads.json
+.DS_Store
+Thumbs.db
