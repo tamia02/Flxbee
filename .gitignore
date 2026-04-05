@@ -10,3 +10,6 @@ outreach_queue.json
 leads.json
 .DS_Store
 Thumbs.db
+.wwebjs_cache/
+server_log*.txt
+.env

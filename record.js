@@ -11,9 +11,12 @@ async function recordSite(htmlFile, outputName) {
     }
     console.log(`  Recording: ${outputName}`);
 
+    const executablePath = "C:/Program Files (x86)/Google/Chrome/Application/chrome.exe";
+    console.log(`  Using browser: ${executablePath}`);
+
     const browser = await puppeteer.launch({
-        headless: false,
-        executablePath: "C:\\Program Files (x86)\\Google\\Chrome\\Application\\chrome.exe",
+        headless: true,
+        executablePath: executablePath,
         args: ['--no-sandbox', '--disable-setuid-sandbox']
     });
 
