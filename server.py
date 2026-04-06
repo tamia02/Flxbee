@@ -146,7 +146,7 @@ async def startup_event():
     except Exception as e:
         add_log(f"CRITICAL: Failed to start WhatsApp thread: {e}")
 
-DASHBOARD_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'dashboard.html')
+DASHBOARD_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'index.html')
 
 @app.get("/")
 async def read_index():
@@ -155,7 +155,7 @@ async def read_index():
         raise HTTPException(status_code=404, detail="Dashboard file missing on server")
     return FileResponse(DASHBOARD_PATH, headers={"Cache-Control": "no-store, no-cache, must-revalidate, max-age=0"})
 
-@app.get("/dashboard.html")
+@app.get("/index.html")
 async def read_dashboard():
     return FileResponse(DASHBOARD_PATH, headers={"Cache-Control": "no-store, no-cache, must-revalidate, max-age=0"})
 
