@@ -131,11 +131,26 @@
                     </div>
                 </div>
                 
-                <div x-show="whatsapp.qr" class="glass p-4 rounded-3xl border-primary/30 flex flex-col items-center gap-4 fixed top-10 right-10 z-50 shadow-2xl">
-                    <p class="text-[10px] font-bold text-primary uppercase tracking-widest">Scan QR Code</p>
-                    <img :src="'https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=' + whatsapp.qr" 
-                         class="bg-white p-2 rounded-xl">
-                    <button @click="whatsapp.qr = null" class="text-gray-500 text-[9px] uppercase font-bold hover:text-white">Dismiss</button>
+                <div x-show="whatsapp.qr" 
+                     class="glass p-6 rounded-[2.5rem] border-primary/30 flex flex-col items-center gap-6 fixed top-10 right-10 z-[100] shadow-2xl animate-in fade-in zoom-in duration-300">
+                    <div class="flex items-center gap-2">
+                        <div class="w-2 h-2 rounded-full bg-primary animate-pulse"></div>
+                        <p class="text-[10px] font-black text-white uppercase tracking-[0.2em]">WhatsApp Login Required</p>
+                    </div>
+                    
+                    <div class="bg-white p-4 rounded-3xl shadow-xl">
+                        <img :src="'https://api.qrserver.com/v1/create-qr-code/?size=250x250&format=png&data=' + encodeURIComponent(whatsapp.qr)" 
+                             class="w-[200px] h-[200px]"
+                             @load="console.log('QR Code Rendered Successfully')">
+                    </div>
+                    
+                    <div class="text-center space-y-2">
+                        <p class="text-[9px] text-gray-500 font-bold uppercase tracking-widest">Scan with your phone's WhatsApp</p>
+                        <button @click="whatsapp.qr = null" 
+                                class="w-full py-2.5 rounded-xl bg-white/5 border border-white/10 text-gray-400 text-[9px] uppercase font-black hover:text-white hover:bg-white/10 transition-all">
+                            Dismiss
+                        </button>
+                    </div>
                 </div>
             </div>
 
@@ -179,20 +194,22 @@
                                     <template x-for="(status, sIdx) in [
                                         {label: 'Build', key: 'building', check: 'html_file'},
                                         {label: 'Record', key: 'recording', check: 'video_file'},
-                                        {label: 'Send', key: 'queuing', check: 'completed'}
+                                        {label: 'Send', key: 'queuing', check: 'reached'}
                                     ]" :key="sIdx">
-                                        <div class="flex-1 flex flex-col items-center gap-2">
-                                            <div class="w-10 h-10 rounded-2xl flex items-center justify-center border transition-all duration-500"
-                                                 :class="{
-                                                     'bg-green-500/20 border-green-500 text-green-400 shadow-[0_0_10px_rgba(34,197,94,0.3)]': sIdx === 0 ? lead.html_file : (sIdx === 1 ? lead.video_file : lead.status === 'completed'),
-                                                     'bg-yellow-500/10 border-yellow-500/50 text-yellow-400 pulse-yellow': lead.status === status.key,
-                                                     'bg-surface border-white/10 text-gray-700': !(lead.status === status.key) && !(sIdx === 0 ? lead.html_file : (sIdx === 1 ? lead.video_file : lead.status === 'completed'))
-                                                 }">
-                                                <i :data-lucide="sIdx === 0 ? 'globe' : (sIdx === 1 ? 'video' : 'send')" class="w-4 h-4"></i>
+                                        <div class="flex items-center gap-2">
+                                            <div class="flex flex-col items-center gap-2">
+                                                <div class="w-10 h-10 rounded-2xl flex items-center justify-center border transition-all duration-500"
+                                                     :class="{
+                                                         'bg-green-500/20 border-green-500 text-green-400 shadow-[0_0_10px_rgba(34,197,94,0.3)]': sIdx === 0 ? lead.html_file : (sIdx === 1 ? lead.video_file : lead.reached),
+                                                         'bg-yellow-500/10 border-yellow-500/50 text-yellow-400 pulse-yellow': lead.status === status.key,
+                                                         'bg-surface border-white/10 text-gray-700': !(lead.status === status.key) && !(sIdx === 0 ? lead.html_file : (sIdx === 1 ? lead.video_file : lead.reached))
+                                                     }">
+                                                    <i :data-lucide="sIdx === 0 ? 'globe' : (sIdx === 1 ? 'video' : 'send')" class="w-4 h-4"></i>
+                                                </div>
+                                                <span class="text-[8px] uppercase font-black tracking-widest" x-text="status.label"></span>
                                             </div>
-                                            <span class="text-[8px] uppercase font-black tracking-widest" x-text="status.label"></span>
+                                            <div x-show="sIdx < 2" class="w-4 h-[1px] bg-white/10 -mt-6"></div>
                                         </div>
-                                        <div x-show="sIdx < 2" class="w-4 h-[1px] bg-white/10 -mt-6"></div>
                                     </template>
                                 </div>
 

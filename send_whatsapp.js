@@ -5,6 +5,23 @@ const puppeteer = require('puppeteer');
 
 const QUEUE_FILE = path.join(__dirname, 'outreach_queue.json');
 const LEADS_FILE = path.join(__dirname, 'leads.json');
+const AUTH_DIR = path.join(__dirname, '.wwebjs_auth');
+
+// ── HARD RESET HANDLER ──────────────────────────────────────────────────
+if (process.argv.includes('--reset')) {
+    console.log('WHATSAPP: Deleting session data...');
+    try {
+        if (fs.existsSync(AUTH_DIR)) {
+            fs.rmSync(AUTH_DIR, { recursive: true, force: true });
+            console.log('WHATSAPP: Session data cleared.');
+        } else {
+            console.log('WHATSAPP: No session data found to clear.');
+        }
+    } catch (e) {
+        console.error('WHATSAPP_RESET_ERROR:', e.message);
+    }
+    process.exit(0);
+}
 
 (async () => {
     console.log('WHATSAPP: Starting outreach client...');

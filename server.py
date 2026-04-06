@@ -115,10 +115,22 @@ def run_whatsapp_manager():
         if "WHATSAPP_READY" in line_clean:
             WHATSAPP_STATUS["status"] = "connected"
             WHATSAPP_STATUS["qr"] = None
+            add_log("SERVER: WhatsApp is READY and listening for tasks.")
         if "WHATSAPP_AUTH_FAILURE" in line_clean:
             WHATSAPP_STATUS["status"] = "auth_failure"
         if "WHATSAPP_DISCONNECTED" in line_clean:
             WHATSAPP_STATUS["status"] = "disconnected"
+        
+        # Parse Send Success: WHATSAPP_SEND_SUCCESS:Name:Index
+        if "WHATSAPP_SEND_SUCCESS" in line_clean:
+            try:
+                parts = line_clean.split(":")
+                if len(parts) >= 3:
+                    lead_index = int(parts[2])
+                    update_lead_reached_status(lead_index)
+                    update_lead_status(lead_index, "completed")
+            except Exception as e:
+                add_log(f"Manager Error parsing success: {e}")
     
     WHATSAPP_PROCESS.stdout.close()
     WHATSAPP_PROCESS.wait()
@@ -177,9 +189,13 @@ async def reset_whatsapp():
     add_log("WHATSAPP: Clearing session data...")
     subprocess.run(["node", os.path.join(BASE_DIR, "send_whatsapp.js"), "--reset"], cwd=BASE_DIR)
     
-    # 3. Restart manager
+    # 3. Force kill any zombie chrome/node instances to unlock files
+    subprocess.run(["taskkill", "/F", "/IM", "chrome.exe", "/T"], capture_output=True)
+    subprocess.run(["taskkill", "/F", "/IM", "node.exe", "/T"], capture_output=True)
+    
+    # 4. Restart manager
     threading.Thread(target=run_whatsapp_manager, daemon=True).start()
-    return {"status": "success", "message": "WhatsApp reset initiated."}
+    return {"status": "success", "message": "WhatsApp hard reset complete."}
 
 def run_proc_live(cmd, name):
     """Runs a process and streams logs to the queue"""
@@ -280,7 +296,6 @@ async def run_demo(phone: str):
     def run():
         add_log(f"[DEMO] Starting One-Click Demo for {phone}...")
         run_proc_live([sys.executable, os.path.join(BASE_DIR, "demo_flow.py"), phone], "DemoFlow")
-    
     threading.Thread(target=run).start()
     return {"status": "success", "message": "Demo started! Check WhatsApp soon."}
 
@@ -360,8 +375,7 @@ async def run_mission(lead_index: int):
             }
             
             if safe_queue_add(task):
-                update_lead_status(lead_index, "completed")
-                add_log(f"[SUCCESS] Mission complete for {lead_name}")
+                add_log(f"[SUCCESS] Mission queued for {lead_name}")
             else:
                 raise Exception("Failed to write to outreach_queue.json")
             
@@ -493,8 +507,8 @@ async def run_mission_logic(lead_index):
         v_path = os.path.abspath(f"videos/{s_name}.mp4")
         task = {"index": lead_index, "phone": lead['phone'], "name": lead['name'], "videoPath": v_path}
         if safe_queue_add(task):
-            update_lead_status(lead_index, "completed")
-            add_log(f"[MISSION] ✅ SUCCESS: {lead_name} reached.")
+            # DO NOT set 'completed' here. The WhatsApp manager will do it upon confirmation.
+            add_log(f"[MISSION] 📥 Queued for outreach: {lead_name}")
         else:
             raise Exception("Queue failure")
             
